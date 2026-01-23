@@ -878,14 +878,16 @@ class ThreadSafeWriter:
 def open_folder(path):
     """跨平台打开文件夹"""
     ensure_dir(path)
+    print(f"[System] 尝试打开文件夹: {path}")
     try:
         if sys.platform == 'darwin':       # macOS
-            subprocess.run(['open', path])
+            subprocess.Popen(['open', path])
         elif sys.platform == 'win32':      # Windows
             os.startfile(path)
         else:                              # Linux
-            subprocess.run(['xdg-open', path])
+            subprocess.Popen(['xdg-open', path])
     except Exception as e:
+        print(f"[Error] 打开文件夹失败: {e}")
         messagebox.showerror("错误", f"无法打开文件夹: {e}")
 
 # 在 RenameApp 类中修改按钮回调

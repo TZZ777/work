@@ -1,0 +1,5 @@
+git add .
+git commit -m "setup mac build workflow"
+git remote add origin https://github.com/TZZ777/work.git
+git branch -M main
+git push -u origin main
