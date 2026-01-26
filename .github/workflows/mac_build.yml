@@ -1,5 +1,9 @@
-name: Build for MacOS
-on: [push]
+name: Build MacOS App
+on: 
+  push:
+    branches:
+      - main  # 或者改为你代码提交的主分支名
+  workflow_dispatch: # 允许手动触发构建
 
 jobs:
   build:
@@ -16,14 +20,28 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller chardet Pillow
+          pip install pyinstaller Pillow  # 移除非必要依赖，减少体积
 
-      - name: Build for Intel and Apple Silicon
+      - name: Build MacOS App Bundle
         run: |
-          pyinstaller --onefile --windowed --target-arch universal2 rename.py
+          # 使用 PyInstaller 生成 .app
+          # --windowed: 无控制台窗口
+          # --noconfirm: 覆盖现有输出
+          # --target-arch universal2: 支持 Intel 和 M1/M2 芯片
+          pyinstaller --windowed \
+                      --noconfirm \
+                      --target-arch universal2 \
+                      --name "RenameTool" \
+                      rename.py
+          
+          # 关键步骤：使用 macOS 原生 ditto 工具压缩
+          # 相比普通 zip，ditto 能完美保留 Unix 权限位（+x）和 .app 内部结构
+          cd dist
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "RenameTool.app" "RenameTool_Mac.zip"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MacOS_Universal_Executable
-          path: dist/rename
+          name: RenameTool_MacOS_Ready
+          path: dist/RenameTool_Mac.zip
+          retention-days: 5

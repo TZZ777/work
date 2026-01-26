@@ -265,24 +265,31 @@ dict_t = {
       "folders": ["全套资料公司"],
       "tag": "#土地出让明细#"
      ,"flag":True
+    },
+    "风控部工作细则": {
+      "keywords": ["风控部工作细则"],
+      "folders": ["全套资料公司"],
+      "tag": "#风控部工作细则#"
+     ,"flag":True
     }
   }
 }
 
 def get_app_path(relative_path=""):
-    """获取应用程序运行目录的路径（用于data、output等用户数据目录）
-    
-    开发环境返回当前目录；打包后返回exe所在目录
-    """
+    """获取应用程序运行目录的路径"""
     if getattr(sys, 'frozen', False):
-        # 如果是打包后的exe
+        # 打包后的路径
         base_path = os.path.dirname(sys.executable)
+        
+        # 针对 macOS .app Bundle 的特殊处理
+        # 如果路径包含 .app/Contents/MacOS，说明在 Mac 包内，需要向外跳三层
+        if sys.platform == 'darwin' and '.app/Contents/MacOS' in base_path:
+            base_path = os.path.abspath(os.path.join(base_path, '../../..'))
     else:
-        # 如果是开发环境
+        # 开发环境
         base_path = os.path.abspath(".")
     
     return os.path.join(base_path, relative_path)
-
 
 def ensure_dir(path):
     """确保目录存在，不存在则创建"""
