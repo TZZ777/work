@@ -276,17 +276,14 @@ dict_t = {
 }
 
 def get_app_path(relative_path=""):
-    """获取应用程序运行目录的路径"""
+    """针对 macOS .app 优化的路径获取函数"""
     if getattr(sys, 'frozen', False):
-        # 打包后的路径
+        # 获取二进制文件所在路径
         base_path = os.path.dirname(sys.executable)
-        
-        # 针对 macOS .app Bundle 的特殊处理
-        # 如果路径包含 .app/Contents/MacOS，说明在 Mac 包内，需要向外跳三层
+        # 如果在 macOS Bundle 内部运行，则向外跳转 3 层到 .app 所在目录
         if sys.platform == 'darwin' and '.app/Contents/MacOS' in base_path:
             base_path = os.path.abspath(os.path.join(base_path, '../../..'))
     else:
-        # 开发环境
         base_path = os.path.abspath(".")
     
     return os.path.join(base_path, relative_path)
