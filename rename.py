@@ -39,7 +39,6 @@ dict_t = {
     "有息负债明细2": {"keywords": ["融资明细","借款明细","银行贷款","融资.xlsx","融资.xls","负债","债务"], "folders": ["担保人"], "tag": "#担保人有息负债明细#", "flag":True},
     "法定代表人简历1": {"keywords": ["法人简历","法定代表人简历表","简历"], "folders": ["承租人"], "tag": "#承租人法定代表人简历#", "flag":True},
     "法定代表人简历2": {"keywords": ["法人简历","法定代表人简历表","简历"], "folders": ["担保人"], "tag": "#担保人法定代表人简历#", "flag":True},
-    "法定代表人简历2": {"keywords": ["法人简历","法定代表人简历表"], "folders": ["担保人"], "tag": "#担保人法定代表人简历#", "flag":True},
     "征信报告1": {"keywords": ["征信报告","征信报告表","征信"], "folders": ["承租人"], "tag": "#承租人征信报告#", "flag":False},
     "征信报告2": {"keywords": ["征信报告","征信报告表","征信"], "folders": ["担保人"], "tag": "#担保人征信报告#", "flag":False},
     "法定代表人身份证1": {"keywords": ["法人身份证","法定代表人身份证表","身份证"], "folders": ["承租人"], "tag": "#承租人法定代表人身份证#", "flag":True},
@@ -184,7 +183,7 @@ def direct_batch_process(rules_dict):
                     for f_info in files:
                         new_name = renamer.generate_new_name(f_info, file_type)
                         new_p = os.path.join(os.path.dirname(f_info['path']), new_name)
-                        if not os.path.exists(new_p):
+                        if os.path.exists(f_info['path']) and not os.path.exists(new_p):
                             os.rename(f_info['path'], new_p)
         except Exception as e:
             print(f"Error: {e}")
