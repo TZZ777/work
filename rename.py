@@ -8,6 +8,7 @@ import threading
 import queue
 import subprocess
 import ctypes
+import unicodedata
 
 dict_t = {
   "name": "租赁金融报告模版V0.2",
@@ -71,10 +72,16 @@ def get_app_path(relative_path=""):
         base_path = os.path.abspath(".")
     
     full_path = os.path.join(base_path, relative_path)
-    # macOS Sequoia 下必须确保路径存在，否则后续 os.listdir 会报错
     if relative_path and not os.path.exists(full_path):
-        try: os.makedirs(full_path, exist_ok=True)
-        except: pass
+        try:
+            os.makedirs(full_path, exist_ok=True)
+        except:
+            fallback_base = os.path.join(os.path.expanduser("~"), "RenameTool")
+            full_path = os.path.join(fallback_base, relative_path)
+            try:
+                os.makedirs(full_path, exist_ok=True)
+            except:
+                pass
     return os.path.abspath(full_path)
 
 def ensure_dir(path):
@@ -82,6 +89,12 @@ def ensure_dir(path):
     if not os.path.exists(p):
         os.makedirs(p, exist_ok=True)
     return p
+
+def normalize_text(text):
+    if text is None:
+        return ""
+    normalized = unicodedata.normalize("NFKC", str(text)).lower()
+    return re.sub(r"[\s\-_()（）\[\]【】]", "", normalized)
 
 # --- 逻辑修复: 核心重命名类 ---
 class UniversalFileRenamer:
@@ -123,7 +136,8 @@ class UniversalFileRenamer:
                 file_path = os.path.abspath(os.path.join(folder_path, file))
                 if file.lower().endswith(tuple(self.supported_extensions)) and os.path.isfile(file_path):
                     if '#' in file: continue
-                    if any(keyword in file for keyword in rules["keywords"]):
+                    normalized_file = normalize_text(file)
+                    if any(normalize_text(keyword) in normalized_file for keyword in rules["keywords"] if keyword):
                         if not any(f['path'] == file_path for f in found_files[file_type]):
                             found_files[file_type].append({
                                 'path': file_path,
@@ -163,14 +177,32 @@ def direct_batch_process(rules_dict):
             found_files = renamer.find_target_files(package_path)
             
             missing_in_package = []
+            keyword_issues_in_package = []
             for rule_name, files in found_files.items():
+                rule_info = rules_dict["rules"].get(rule_name)
                 if not files:
-                    rule_info = rules_dict["rules"].get(rule_name)
                     missing_in_package.append({
                         "rule": rule_name, "tag": rule_info.get("tag"),
                         "keywords": rule_info.get("keywords"), "flag": rule_info.get("flag")
                     })
-            if missing_in_package: missing_tags_report[package_name] = missing_in_package
+                else:
+                    keywords = rule_info.get("keywords", [])
+                    normalized_files = [normalize_text(f["filename"]) for f in files]
+                    unmatched = [
+                        kw for kw in keywords
+                        if normalize_text(kw) and not any(normalize_text(kw) in nf for nf in normalized_files)
+                    ]
+                    if unmatched:
+                        keyword_issues_in_package.append({
+                            "rule": rule_name,
+                            "tag": rule_info.get("tag"),
+                            "unmatched_keywords": unmatched
+                        })
+            if missing_in_package or keyword_issues_in_package:
+                missing_tags_report[package_name] = {
+                    "missing": missing_in_package,
+                    "unmatched_keywords": keyword_issues_in_package
+                }
 
             # 2. 复制并执行重命名
             if any(len(f) > 0 for f in found_files.values()):
@@ -270,11 +302,18 @@ class RenameApp:
         txt = scrolledtext.ScrolledText(top, font=self.log_font, padx=10, pady=10)
         txt.pack(expand=True, fill='both')
         content = ""
-        for pkg, missing in report.items():
+        for pkg, details in report.items():
             content += f"📦 材料包: {pkg}\n{'='*60}\n"
-            for i, m in enumerate(missing, 1):
-                status = "【必须】" if m['flag'] else "【可选】"
-                content += f" {i}. {status} 缺失: {m['tag']}\n    关键词: {', '.join(m['keywords'])}\n"
+            missing = details.get("missing", [])
+            keyword_issues = details.get("unmatched_keywords", [])
+            if missing:
+                for i, m in enumerate(missing, 1):
+                    status = "【必须】" if m['flag'] else "【可选】"
+                    content += f" {i}. {status} 缺失: {m['tag']}\n    关键词: {', '.join(m['keywords'])}\n"
+            if keyword_issues:
+                content += "\n  关键词未匹配到文件名:\n"
+                for i, item in enumerate(keyword_issues, 1):
+                    content += f"  {i}. {item['tag']}\n    未匹配关键词: {', '.join(item['unmatched_keywords'])}\n"
             content += "\n"
         txt.insert(tk.END, content); txt.config(state='disabled')
         ttk.Button(top, text="确定", style="Secondary.TButton", command=top.destroy).pack(pady=10)
@@ -285,9 +324,15 @@ class RenameApp:
 def open_folder(path):
     path = os.path.abspath(path)
     ensure_dir(path)
-    if sys.platform == 'darwin': subprocess.Popen(['open', path])
-    elif sys.platform == 'win32': os.startfile(path)
-    else: subprocess.Popen(['xdg-open', path])
+    try:
+        if sys.platform == 'darwin':
+            subprocess.run(['open', path], check=True)
+        elif sys.platform == 'win32':
+            os.startfile(path)
+        else:
+            subprocess.run(['xdg-open', path], check=True)
+    except Exception as e:
+        messagebox.showerror("错误", f"无法打开文件夹: {e}")
 
 def main():
     if sys.platform == 'win32':
