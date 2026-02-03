@@ -32,16 +32,16 @@ jobs:
                       --noconfirm \
                       --target-arch universal2 \
                       --name "RenameTool" \
-                      rename.py
+                      renameZIP.py
           
           # 关键步骤：使用 macOS 原生 ditto 工具压缩
           # 相比普通 zip，ditto 能完美保留 Unix 权限位（+x）和 .app 内部结构
           cd dist
-          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "RenameTool.app" "RenameTool_Mac.zip"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "RenameTool.app" "RenameToolMac.zip"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RenameTool_MacOS_Ready
-          path: dist/RenameTool_Mac.zip
+          name: RenameToolMacOSReady
+          path: dist/RenameToolMac.zip
           retention-days: 5
