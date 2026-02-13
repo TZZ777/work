@@ -346,22 +346,7 @@ def open_folder(path):
     ensure_dir(path)
     try:
         if sys.platform == 'darwin':
-            escaped_path = path.replace('"', '\\"')
-            commands = [
-                ['osascript', '-e', f'tell application "Finder" to open POSIX file "{escaped_path}"', '-e', 'tell application "Finder" to activate'],
-                ['open', path],
-                ['open', '-a', 'Finder', path]
-            ]
-            last_error = None
-            for cmd in commands:
-                try:
-                    result = subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    if result.returncode == 0:
-                        return
-                    last_error = RuntimeError(f"command failed: {result.returncode}")
-                except Exception as e:
-                    last_error = e
-            raise last_error if last_error else RuntimeError("open failed")
+            subprocess.run(['open', path], check=True)
         elif sys.platform == 'win32':
             os.startfile(path)
         else:
