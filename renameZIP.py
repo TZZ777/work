@@ -334,7 +334,7 @@ class RenameApp:
                         os.remove(zip_file)
                     except:
                         pass
-                shutil.make_archive(zip_base, 'zip', root_dir=folder_path)
+                shutil.make_archive(zip_base, 'zip', root_dir=output_path, base_dir=name)
             self.root.after(0, lambda: messagebox.showinfo("提示", "压缩完成！"))
         except Exception as e:
             self.root.after(0, lambda: messagebox.showerror("错误", f"压缩失败: {e}"))
