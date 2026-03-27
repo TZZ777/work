@@ -57,8 +57,8 @@ dict_t = {
     "土地出让明细": {"keywords": ["土地出让明细"], "folders": ["全套资料公司"], "tag": "#土地出让明细#", "flag":True},
     "风控部工作细则": {"keywords": ["风控部工作细则"], "folders": ["全套资料公司"], "tag": "#风控部工作细则#", "flag":True},
     "融资情况": {"keywords": ["融资情况"], "folders": ["全套资料公司"], "tag": "#融资情况#", "flag":True},
-    "最新年份审计报告注释1": {"keywords": ["附注","注释"], "folders": ["承租人"], "tag": "#最新年份审计报告注释#", "flag":True},
-    "最新年份审计报告注释2": {"keywords": ["附注","注释"], "folders": ["担保人"], "tag": "#最新年份审计报告注释#", "flag":True}
+    "最新年份审计报告注释1": {"keywords": ["附注","注释"], "folders": ["承租人"], "tag": "#承租人最新年份审计报告注释#", "flag":True},
+    "最新年份审计报告注释2": {"keywords": ["附注","注释"], "folders": ["担保人"], "tag": "#担保人最新年份审计报告注释#", "flag":True}
   }
 }
 class UniversalFileRenamer:
