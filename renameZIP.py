@@ -105,6 +105,13 @@ class UniversalFileRenamer:
         default_extensions = [".pdf", ".doc", ".docx", ".xlsx", ".xls", ".png", ".jpg", ".jpeg"]
         self.supported_extensions = [ext.lower() for ext in default_extensions]
 
+    def _matches_target_folder(self, target_folder, path_parts):
+        folder_aliases = {
+            "担保人": {"担保人", "保证人"}
+        }
+        candidates = folder_aliases.get(target_folder, {target_folder})
+        return any(any(candidate in part for candidate in candidates) for part in path_parts)
+
     def find_target_files(self, base_folder):
         base_folder = os.path.abspath(base_folder)
         found_files = {file_type: [] for file_type in self.file_rules.keys()}
@@ -121,7 +128,7 @@ class UniversalFileRenamer:
                     folder_matched = True
                 else:
                     for target_folder in target_folders:
-                        if any(target_folder in part for part in path_parts):
+                        if self._matches_target_folder(target_folder, path_parts):
                             folder_matched = True
                             break
                 
@@ -221,7 +228,7 @@ class RenameApp:
     def __init__(self, root):
         self.root = root
         self.root.title("通用文件重命名工具")
-        self.root.geometry("600x250")
+        self.root.geometry("840x250")
         self.root.resizable(False, False)
         self.root.configure(bg="#f8f9fa")
         
@@ -296,7 +303,7 @@ class RenameApp:
         txt.pack(expand=True, fill='both')
         content = ""
         for pkg, details in report.items():
-            content += f"📦 材料包: {pkg}\n{'='*60}\n"
+            content += f"材料包: {pkg}\n{'='*60}\n"
             missing = details.get("missing", [])
             keyword_issues = details.get("unmatched_keywords", [])
             if missing:
