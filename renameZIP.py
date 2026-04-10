@@ -38,8 +38,8 @@ dict_t = {
     "公司简介2": {"keywords": ["公司简介","企业简介"], "folders": ["担保人"], "tag": "#担保人公司简介#", "flag":True},
     "担保明细1": {"keywords": ["担保明细","担保明细表","担保情况","担保"], "folders": ["承租人"], "tag": "#承租人担保明细#", "flag":True},
     "担保明细2": {"keywords": ["担保明细","担保明细表","担保情况","担保"], "folders": ["担保人"], "tag": "#担保人担保明细#", "flag":True},
-    "有息负债明细1": {"keywords": ["融资明细","借款明细","银行贷款","融资.xlsx","融资.xls","负债","债务"], "folders": ["承租人"], "tag": "#承租人有息负债明细#", "flag":True},
-    "有息负债明细2": {"keywords": ["融资明细","借款明细","银行贷款","融资.xlsx","融资.xls","负债","债务"], "folders": ["担保人"], "tag": "#担保人有息负债明细#", "flag":True},
+    "有息负债明细1": {"keywords": ["融资明细","借款明细","银行贷款","融资","融资","负债","债务"], "folders": ["承租人"], "tag": "#承租人有息负债明细#", "flag":True},
+    "有息负债明细2": {"keywords": ["融资明细","借款明细","银行贷款","融资","融资","负债","债务"], "folders": ["担保人"], "tag": "#担保人有息负债明细#", "flag":True},
     "法定代表人简历1": {"keywords": ["法人简历","法定代表人简历表","简历"], "folders": ["承租人"], "tag": "#承租人法定代表人简历#", "flag":True},
     "法定代表人简历2": {"keywords": ["法人简历","法定代表人简历表","简历"], "folders": ["担保人"], "tag": "#担保人法定代表人简历#", "flag":True},
     "征信报告1": {"keywords": ["征信报告","征信报告表","征信"], "folders": ["承租人"], "tag": "#承租人征信报告#", "flag":False},
@@ -102,7 +102,7 @@ class UniversalFileRenamer:
     def __init__(self, template_dict):
         self.current_template = template_dict.get("name", "未命名模板")
         self.file_rules = template_dict.get("rules", {})
-        default_extensions = [".pdf", ".doc", ".docx", ".xlsx", ".xls", ".png", ".jpg", ".jpeg"]
+        default_extensions = [".pdf", ".xlsm",".doc", ".docx", ".xlsx", ".xls", ".png", ".jpg", ".jpeg"]
         self.supported_extensions = [ext.lower() for ext in default_extensions]
 
     def _matches_target_folder(self, target_folder, path_parts):
